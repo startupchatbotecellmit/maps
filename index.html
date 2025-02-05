@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Map with Pop-ups</title>
     <style>
-        body {
-            text-align: center;
-            margin: 0;
-        }
+    body {
+    text-align: center;
+    margin: 0;
+}
+
 .map-container {
     position: relative;
     display: block;
@@ -25,21 +26,21 @@
     margin: 0 auto;
     padding: 0;
 }
+
 .location {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background-color: red;
-            cursor: pointer;
-            border-radius: 50%;
-            border: 2px solid black;
-            transition: transform 0.3s;
-        }
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid black;
+    transition: transform 0.3s;
+}
 
-        .location:hover {
-            transform: scale(1.3);
-        }
-
+.location:hover {
+    transform: scale(1.3);
+}
 
 .popup {
     display: none;
@@ -49,12 +50,20 @@
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    width: 180px;  /* Smaller size for mobile */
+    width: 180px;  /* Default size */
     font-size: 12px;
     text-align: left;
     z-index: 1000;
     max-width: 90vw; /* Ensure popups don't overflow on smaller screens */
 }
+
+/* Media query for mobile portrait */
+@media (max-width: 600px) {
+    .popup {
+        width: 80vw; /* Make popups wider on mobile */
+        font-size: 14px; /* Slightly larger text */
+    }
+}    
     </style>
 </head>
 <body>
@@ -106,11 +115,11 @@ function showPopup(event, location) {
     let popupY = y - rect.top + window.scrollY;
 
     // Prevent popups from going offscreen
-    if (popupX + popup.offsetWidth > rect.width) {
-        popupX -= popup.offsetWidth + 10;
+    if (popupX + popup.offsetWidth > window.innerWidth) {
+        popupX = window.innerWidth - popup.offsetWidth - 10; // Adjust to fit within the viewport
     }
-    if (popupY + popup.offsetHeight > rect.height) {
-        popupY -= popup.offsetHeight + 10;
+    if (popupY + popup.offsetHeight > window.innerHeight) {
+        popupY = window.innerHeight - popup.offsetHeight - 10; // Adjust to fit within the viewport
     }
 
     popup.innerHTML = `<strong>${location}</strong><br>More details here.`;
@@ -118,7 +127,6 @@ function showPopup(event, location) {
     popup.style.top = `${popupY}px`;
     popup.style.display = 'block';
 }
-
 // Hide popup when clicking outside
 document.addEventListener('click', function (event) {
     if (!event.target.classList.contains('location')) {
