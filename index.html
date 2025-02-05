@@ -59,7 +59,6 @@
         const map = L.map('map', {
             crs: L.CRS.Simple,
             minZoom: -2,
-            maxZoom: 2,  // Added maxZoom for better control
             zoomControl: false
         });
 
@@ -74,16 +73,7 @@
         img.onload = function() {
             const bounds = [[0, 0], [img.height, img.width]];
             L.imageOverlay(imageUrl, bounds).addTo(map);
-            
-            // Improved initial view settings
-            map.fitBounds(bounds, {
-                padding: [50, 50],    // Add padding around the bounds
-                maxZoom: 0,           // Limit initial zoom level
-                animate: true         // Smooth animation to bounds
-            });
-            
-            // Set a minimum zoom level that ensures the map is always visible
-            map.setMinZoom(map.getBoundsZoom(bounds, true) - 1);
+            map.fitBounds(bounds);
 
             const locations = [
                 {
