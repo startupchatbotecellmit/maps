@@ -8,62 +8,79 @@
         body {
             text-align: center;
             margin: 0;
+            padding: 0;
         }
         .map-container {
             position: relative;
             display: inline-block;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-       #map-image {
-    width: 100%;
-    height: 90vh;  /* This will make the image take up 90% of the viewport height */
-    object-fit: contain;  /* This ensures the image maintains its aspect ratio */
-    margin: 0 auto;  /* Centers the image horizontally */
-    display: block;  /* Removes any default inline spacing */
-    padding: 20px;  /* Adds some padding around the image */
-}
+        #map-image {
+            width: 100%;
+            height: 90vh;
+            object-fit: contain;
+            margin: 0 auto;
+            display: block;
+        }
         .location {
-    position: absolute;
-    width: 8px;  /* Smaller size for dot */
-    height: 8px;  /* Equal height for circle */
-    background-color: #ff0000;  /* Red color */
-    cursor: pointer;
-    border-radius: 50%;  /* Makes it circular */
-    border: 2px solid #000000;  /* Black border */
-    transition: transform 0.3s;  /* Smooth transform on hover */
-}
+            position: absolute;
+            width: 2vmin;
+            height: 2vmin;
+            background-color: #ff0000;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 0.5vmin solid #000000;
+            transition: transform 0.3s;
+            transform: translate(-50%, -50%); /* Center the dot on its position */
+        }
         .location:hover {
-    transform: scale(1.2);  /* Slightly enlarge on hover */
-}
+            transform: translate(-50%, -50%) scale(1.2);
+        }
         .popup {
-    display: none;
-    position: absolute;
-    background: rgba(173, 216, 230, 0.8);  /* Translucent light blue */
-    /* or alternatively you could use: background: rgba(135, 206, 235, 0.8); for sky blue */
-    color: black;  /* Changed to black for better readability on light background */
-    padding: 20px;
-    border-radius: 0;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    width: 300px;
-    text-align: left;
-}
+            display: none;
+            position: absolute;
+            background: rgba(173, 216, 230, 0.9);
+            color: black;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            width: 300px;
+            text-align: left;
+            z-index: 1000;
+        }
         .dropdown {
             cursor: pointer;
-            background: rgba(255, 255, 255, 0.05);  /* Semi-transparent white */
+            background: rgba(255, 255, 255, 0.1);
             padding: 8px;
             margin-top: 8px;
-            border-left: 3px solid #f1c40f;  /* Golden accent */
+            border-left: 3px solid #f1c40f;
             transition: background 0.3s;
         }
         .dropdown:hover {
-            background: rgba(255, 255, 255, 0.1);  /* Lighter on hover */
+            background: rgba(255, 255, 255, 0.2);
         }
         .dropdown-content {
             display: none;
             padding: 10px;
-            background: rgba(0, 0, 0, 0.1);  /* Semi-transparent black */
+            background: rgba(0, 0, 0, 0.1);
             border-left: 2px solid #f1c40f;
             margin-top: 5px;
-            color: #ecf0f1;  /* Light gray text */
+            color: black;
+        }
+
+        @media screen and (max-width: 768px) {
+            .popup {
+                width: 80%;
+                max-width: 280px;
+                font-size: 14px;
+                padding: 15px;
+            }
+            .location {
+                width: 3vmin;
+                height: 3vmin;
+            }
         }
     </style>
 </head>
@@ -72,38 +89,54 @@
         <img id="map-image" src="image.png" alt="Campus Map">
         
         <!-- Locations with popups -->
-        <div class="location" style="top: 55%; left: 28%;" onclick="showPopup(event, 'Student Projects')"></div>
-        <div class="location" style="top: 57%; left: 64%;" onclick="showPopup(event, 'IC')"></div>
-        <div class="location" style="top: 57.75%; left: 49.5%;" onclick="showPopup(event, 'MSME-1')"></div>
-	<div class="location" style="top: 53%; left: 71.5%;" onclick="showPopup(event, 'Freelance-Registered')"></div>
-	<div class="location" style="top: 49.5%; left: 78%;" onclick="showPopup(event, 'Freelance-Unregistered')"></div>
-<div class="location" style="top: 47.25%; left: 84.5%;" onclick="showPopup(event, 'MSME-2')"></div>
-
+        <div class="location" style="top: 55%; left: 28%;" data-location="Student Projects"></div>
+        <div class="location" style="top: 57%; left: 64%;" data-location="IC"></div>
+        <div class="location" style="top: 57.75%; left: 49.5%;" data-location="MSME-1"></div>
+        <div class="location" style="top: 53%; left: 71.5%;" data-location="Freelance-Registered"></div>
+        <div class="location" style="top: 49.5%; left: 78%;" data-location="Freelance-Unregistered"></div>
+        <div class="location" style="top: 47.25%; left: 84.5%;" data-location="MSME-2"></div>
         
         <div id="popup" class="popup"></div>
     </div>
     
     <script>
+        const dropdownItems = {
+            "Student Projects": [
+                { title: "Blackfrog Technologies", description: "Blackfrog Technologies Pvt. Ltd. is a Manipal, based technology startup company that seeks to improve the efficiency of immunization supply chains. They have developed a patented system for precision cold-chain and vaccine traceability with support from BIRAC (DBT) and leading impact investors in the nation including Venture Centre (NCL, Pune) and Social Alpha to provide logistical support in the last-mile delivery of vaccines. Emvólio is a portable, battery-powered refrigeration device that will strictly maintain any preset temperature for over 12 hours for last mile transport of vaccines. Emvólio's 2-litre capacity enables it to carry 30- 50 vials, which is standard for a daylong immunization campaign. Further device capabilities include continuous temperature monitoring, location tracking, state-of-charge indication, communication with headquarters via live tracking, and vital statistics for improved coverage." },
+                { title: "Facilities", description: "Study rooms, computers, and free Wi-Fi." }
+            ],
+            "IC": [
+                { title: "Innovation Center", description: "Center for innovation and research." },
+                { title: "Facilities", description: "Labs and workshops available." }
+            ],
+            "MSME-1": [
+                { title: "MSME Center 1", description: "Support for Micro, Small & Medium Enterprises" }
+            ],
+            "Freelance-Registered": [
+                { title: "Registered Freelancers", description: "Information about registered freelancers" }
+            ],
+            "Freelance-Unregistered": [
+                { title: "Unregistered Freelancers", description: "Information about unregistered freelancers" }
+            ],
+            "MSME-2": [
+                { title: "MSME Center 2", description: "Additional MSME support facilities" }
+            ]
+        };
+
         function showPopup(event, location) {
             const popup = document.getElementById('popup');
+            const mapContainer = document.querySelector('.map-container');
+            const rect = mapContainer.getBoundingClientRect();
             
-            const dropdownItems = {
-                "Student Projects": [
-                    { title: "Blackfrog Technologies", description: "Blackfrog Technologies Pvt. Ltd. is a Manipal, based technology startup company that seeks to improve the efficiency of immunization supply chains. They have developed a patented system for precision cold-chain and vaccine traceability with support from BIRAC (DBT) and leading impact investors in the nation including Venture Centre (NCL, Pune) and Social Alpha to provide logistical support in the last-mile delivery of vaccines. Emvólio is a portable, battery-powered refrigeration device that will strictly maintain any preset temperature for over 12 hours for last mile transport of vaccines. Emvólio’s 2-litre capacity enables it to carry 30- 50 vials, which is standard for a daylong immunization campaign. Further device capabilities include continuous temperature monitoring, location tracking, state-of-charge indication, communication with headquarters via live tracking, and vital statistics for improved coverage." },
-                    { title: "Facilities", description: "Study rooms, computers, and free Wi-Fi." }
-                ],
-                "MotoManipal": [
-                    { title: "What is it?", description: "A student club for automotive enthusiasts." },
-                    { title: "Projects", description: "Designs electric and solar-powered vehicles." }
-                ],
-                "Xerox Center": [
-                    { title: "Services", description: "Photocopy, printing, and binding available." },
-                    { title: "Timings", description: "Open from 9 AM to 8 PM." }
-                ]
-            };
+            // Calculate position relative to the map container
+            let x = (event.clientX || event.pageX) - rect.left;
+            let y = (event.clientY || event.pageY) - rect.top;
 
+            // Adjust for scroll position
+            y += window.scrollY;
+            
+            // Generate popup content
             let listHTML = `<strong>${location}</strong><br>Select an option:`;
-
             dropdownItems[location].forEach((item, index) => {
                 listHTML += `
                     <div class="dropdown" onclick="toggleDropdown(${index})">${item.title}</div>
@@ -112,8 +145,21 @@
             });
 
             popup.innerHTML = listHTML;
-            popup.style.left = event.pageX + 'px';
-            popup.style.top = event.pageY + 'px';
+
+            // Position popup
+            const popupWidth = popup.offsetWidth;
+            const popupHeight = popup.offsetHeight;
+            
+            // Ensure popup stays within map boundaries
+            if (x + popupWidth > rect.width) {
+                x = x - popupWidth - 20;
+            }
+            if (y + popupHeight > rect.height) {
+                y = y - popupHeight - 20;
+            }
+
+            popup.style.left = Math.max(0, x) + 'px';
+            popup.style.top = Math.max(0, y) + 'px';
             popup.style.display = 'block';
         }
 
@@ -122,10 +168,34 @@
             content.style.display = content.style.display === "block" ? "none" : "block";
         }
 
+        // Add event listeners for both click and touch
+        document.querySelectorAll('.location').forEach(location => {
+            location.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showPopup(e, this.getAttribute('data-location'));
+            });
+            
+            location.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const touch = e.changedTouches[0];
+                showPopup(touch, this.getAttribute('data-location'));
+            });
+        });
+
+        // Close popup when clicking outside
         document.addEventListener('click', function(event) {
-            if (!event.target.classList.contains('location') && !event.target.classList.contains('dropdown')) {
-                document.getElementById('popup').style.display = 'none';
+            const popup = document.getElementById('popup');
+            if (!event.target.classList.contains('location') && 
+                !event.target.classList.contains('dropdown') &&
+                !popup.contains(event.target)) {
+                popup.style.display = 'none';
             }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            document.getElementById('popup').style.display = 'none';
         });
     </script>
 </body>
