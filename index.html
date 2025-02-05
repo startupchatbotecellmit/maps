@@ -57,17 +57,18 @@
     max-width: 90vw; /* Ensure popups don't overflow on smaller screens */
 }
 
-/* Media query for mobile portrait */
-@media (max-width: 600px) {
-    .popup {
-        width: 80vw; /* Make popups wider on mobile */
-        font-size: 14px; /* Slightly larger text */
-    }
+.mobile-wrap {
+    overflow: hidden;
+}
+
+img {  
+    padding-left: 50%;
+    margin-left: -425px; /* Adjust this based on your image width */
 }    
     </style>
 </head>
 <body>
-
+<div class="mobile-wrap">
     <div class="map-container">
         <img id="map-image" src="map.png" alt="Campus Map">
         <div class="location" data-x="30" data-y="53" onclick="showPopup(event, 'Student Projects')"></div>
@@ -79,6 +80,7 @@
 
         <div id="popup" class="popup"></div>
     </div>
+</div>
 
     <script>
         function adjustLocations() {
