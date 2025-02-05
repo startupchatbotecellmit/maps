@@ -9,23 +9,23 @@
             text-align: center;
             margin: 0;
         }
+.map-container {
+    position: relative;
+    display: block;
+    width: 100vw;  /* Full width */
+    max-width: 900px;  /* Limit size on larger screens */
+    margin: 0 auto;  /* Center the map */
+    overflow: hidden;  /* Prevent extra scroll */
+}
 
-        .map-container {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-            max-width: 900px;
-        }
-
-        #map-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .location {
+#map-image {
+    width: 100%;
+    height: auto;  /* Maintain aspect ratio */
+    display: block;
+    margin: 0 auto;
+    padding: 0;
+}
+.location {
             position: absolute;
             width: 8px;
             height: 8px;
@@ -40,25 +40,27 @@
             transform: scale(1.3);
         }
 
-        .popup {
-            display: none;
-            position: absolute;
-            background: rgba(173, 216, 230, 0.9);
-            color: black;
-            padding: 8px;
-            border-radius: 5px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            width: 180px; /* Smaller popup */
-            font-size: 12px; /* Smaller text */
-            text-align: left;
-            z-index: 1000;
-        }
+
+.popup {
+    display: none;
+    position: absolute;
+    background: rgba(173, 216, 230, 0.9);
+    color: black;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    width: 180px;  /* Smaller size for mobile */
+    font-size: 12px;
+    text-align: left;
+    z-index: 1000;
+    max-width: 90vw; /* Ensure popups don't overflow on smaller screens */
+}
     </style>
 </head>
 <body>
 
     <div class="map-container">
-        <img id="map-image" src="map.png" alt="Campus Map">
+        <img id="map-image" src="E:\Downloads\map.png" alt="Campus Map">
         <div class="location" data-x="30" data-y="53" onclick="showPopup(event, 'Student Projects')"></div>
         <div class="location" data-x="64" data-y="54.5" onclick="showPopup(event, 'IC')"></div>
         <div class="location" data-x="50" data-y="54.5" onclick="showPopup(event, 'MSME-1')"></div>
@@ -71,54 +73,57 @@
 
     <script>
         function adjustLocations() {
-            let mapImage = document.getElementById('map-image');
-            let locations = document.querySelectorAll('.location');
+    let mapImage = document.getElementById('map-image');
+    let locations = document.querySelectorAll('.location');
 
-            let imgWidth = mapImage.clientWidth;
-            let imgHeight = mapImage.clientHeight;
+    let imgWidth = mapImage.clientWidth;
+    let imgHeight = mapImage.clientHeight;
 
-            locations.forEach(loc => {
-                let xPercent = loc.getAttribute('data-x');
-                let yPercent = loc.getAttribute('data-y');
+    locations.forEach(loc => {
+        let xPercent = loc.getAttribute('data-x');
+        let yPercent = loc.getAttribute('data-y');
 
-                loc.style.left = (imgWidth * xPercent / 100) + 'px';
-                loc.style.top = (imgHeight * yPercent / 100) + 'px';
-            });
-        }
+        loc.style.left = (imgWidth * xPercent / 100) + 'px';
+        loc.style.top = (imgHeight * yPercent / 100) + 'px';
+    });
+}
 
-        window.onload = adjustLocations;
-        window.onresize = adjustLocations;
+window.onload = adjustLocations;
+window.onresize = adjustLocations;
 
-        function showPopup(event, location) {
-            const popup = document.getElementById('popup');
-            const mapContainer = document.querySelector('.map-container');
+function showPopup(event, location) {
+    const popup = document.getElementById('popup');
+    const mapContainer = document.querySelector('.map-container');
 
-            popup.innerHTML = `<strong>${location}</strong><br>More details here.`;
+    // Adjust for touch events (mobile)
+    let x = event.clientX || event.touches?.[0]?.clientX;
+    let y = event.clientY || event.touches?.[0]?.clientY;
 
-            // Get map container position to adjust popup
-            const rect = mapContainer.getBoundingClientRect();
+    // Get map container position
+    const rect = mapContainer.getBoundingClientRect();
 
-            let popupX = event.clientX - rect.left + window.scrollX;
-            let popupY = event.clientY - rect.top + window.scrollY;
+    let popupX = x - rect.left + window.scrollX;
+    let popupY = y - rect.top + window.scrollY;
 
-            // Prevent popup from going offscreen
-            if (popupX + popup.offsetWidth > rect.width) {
-                popupX -= popup.offsetWidth + 10;
-            }
-            if (popupY + popup.offsetHeight > rect.height) {
-                popupY -= popup.offsetHeight + 10;
-            }
+    // Prevent popups from going offscreen
+    if (popupX + popup.offsetWidth > rect.width) {
+        popupX -= popup.offsetWidth + 10;
+    }
+    if (popupY + popup.offsetHeight > rect.height) {
+        popupY -= popup.offsetHeight + 10;
+    }
 
-            popup.style.left = popupX + 'px';
-            popup.style.top = popupY + 'px';
-            popup.style.display = 'block';
-        }
+    popup.innerHTML = `<strong>${location}</strong><br>More details here.`;
+    popup.style.left = `${popupX}px`;
+    popup.style.top = `${popupY}px`;
+    popup.style.display = 'block';
+}
 
-        document.addEventListener('click', function(event) {
-            if (!event.target.classList.contains('location')) {
-                document.getElementById('popup').style.display = 'none';
-            }
-        });
-    </script>
+// Hide popup when clicking outside
+document.addEventListener('click', function (event) {
+    if (!event.target.classList.contains('location')) {
+        document.getElementById('popup').style.display = 'none';
+    }
+});    </script>
 </body>
 </html>
