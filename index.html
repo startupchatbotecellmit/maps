@@ -21,18 +21,6 @@
             overflow-y: auto;
             line-height: 1.6;
         }
-        .custom-div-icon {
-            background-color: #ff4500;
-            border: 2px solid white;
-            border-radius: 50%;
-            width: 8px !important;
-            height: 8px !important;
-            box-shadow: 0 0 5px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
-        }
-        .custom-div-icon:hover {
-            transform: scale(1.5);
-        }
         .dropdown {
             cursor: pointer;
             background: #f0f0f0;
@@ -50,6 +38,11 @@
             border-left: 2px solid #007bff;
             margin-top: 5px;
         }
+        .highlight-box {
+            border: 2px solid rgba(255, 69, 0, 0.7);
+            background-color: rgba(255, 69, 0, 0.15); /* Light transparent */
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -59,75 +52,52 @@
         const map = L.map('map', {
             crs: L.CRS.Simple,
             minZoom: -2,
+            maxZoom: 2,
+            zoomDelta: 0.5,
+            zoomSnap: 0.5,
+            wheelDebounceTime: 100,
+            wheelPxPerZoomLevel: 100,
             zoomControl: false
         });
 
-        // Custom zoom control with more intuitive positioning
-        L.control.zoom({
-            position: 'bottomright'
-        }).addTo(map);
+        // Custom zoom control
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         const imageUrl = 'map.png';
         const img = new Image();
-        
+
         img.onload = function() {
             const bounds = [[0, 0], [img.height, img.width]];
             L.imageOverlay(imageUrl, bounds).addTo(map);
             map.fitBounds(bounds);
+            map.setZoom(0); 
 
             const locations = [
-                {
-                    latlng: [img.height * 0.48, img.width * 0.30], 
-                    name: 'Student Projects',
-                    details: [
-                        {
-                            title: 'Blackfrog Technologies',
-                            description: 'Technology startup improving immunization supply chains.'
-                        },
-                        {
-                            title: 'Facilities',
-                            description: 'Study rooms, computers, and free Wi-Fi.'
-                        }
-                    ]
-                },
-                {
-                    latlng: [img.height * 0.473, img.width * 0.625],
-                    name: 'IC',
-                    details: []
-                },
-                {
-                    latlng: [img.height * 0.472, img.width * 0.485],
-                    name: 'MSME-1',
-                    details: []
-                },
-                {
-                    latlng: [img.height * 0.505, img.width * 0.70],
-                    name: 'Freelance-Registered',
-                    details: []
-                },
-                {
-                    latlng: [img.height * 0.535, img.width * 0.785],
-                    name: 'Freelance-Unregistered',
-                    details: []
-                },
-                {
-                    latlng: [img.height * 0.555, img.width * 0.8475],
-                    name: 'MSME-2',
-                    details: []
-                }
+                { latlng: [img.height * 0.48, img.width * 0.30], name: 'Student Projects', boxSize: [img.height * 0.05, img.width * 0.05], details: [{title: 'Blackfrog Technologies', description: 'Technology startup improving immunization supply chains.'}, {title: 'Facilities', description: 'Study rooms, computers, and free Wi-Fi.'}] },
+                { latlng: [img.height * 0.473, img.width * 0.625], name: 'IC', boxSize: [img.height * 0.05, img.width * 0.05], details: [] },
+                { latlng: [img.height * 0.472, img.width * 0.485], name: 'MSME-1', boxSize: [img.height * 0.05, img.width * 0.05], details: [] },
+                { latlng: [img.height * 0.505, img.width * 0.70], name: 'Freelance-Registered', boxSize: [img.height * 0.05, img.width * 0.05], details: [] },
+                { latlng: [img.height * 0.535, img.width * 0.785], name: 'Freelance-Unregistered', boxSize: [img.height * 0.05, img.width * 0.05], details: [] },
+                { latlng: [img.height * 0.555, img.width * 0.8475], name: 'MSME-2', boxSize: [img.height * 0.05, img.width * 0.05], details: [] }
             ];
 
             locations.forEach(location => {
-                const marker = L.marker(location.latlng, {
-                    icon: L.divIcon({
-                        className: 'custom-div-icon'
-                    }),
-                    title: location.name  // Tooltip on hover
-                }).addTo(map);
+                // Create a transparent clickable rectangle
+                const boxBounds = [
+                    [location.latlng[0] - location.boxSize[0]/2, location.latlng[1] - location.boxSize[1]/2],
+                    [location.latlng[0] + location.boxSize[0]/2, location.latlng[1] + location.boxSize[1]/2]
+                ];
+
+                const highlightBox = L.rectangle(boxBounds, {
+    className: 'highlight-box',
+    weight: 0,          // Removes any visible border
+    fillOpacity: 0,     // Fully transparent
+    color: 'transparent' // Completely invisible
+}).addTo(map);
 
                 if (location.details.length > 0) {
                     let popupContent = `<strong style="font-size: 1.2em; color: #007bff;">${location.name}</strong><br>`;
-                    location.details.forEach((detail, index) => {
+                    location.details.forEach(detail => {
                         popupContent += `
                             <div class="dropdown" onclick="this.nextElementSibling.style.display = 
                                 this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">
@@ -138,12 +108,9 @@
                             </div>
                         `;
                     });
-                    marker.bindPopup(popupContent, {
-                        maxWidth: 300,
-                        closeButton: true
-                    });
+                    highlightBox.bindPopup(popupContent, { maxWidth: 300, closeButton: true });
                 } else {
-                    marker.bindPopup(`<strong>${location.name}</strong><br>No details available.`);
+                    highlightBox.bindPopup(`<strong>${location.name}</strong><br>No details available.`);
                 }
             });
         };
