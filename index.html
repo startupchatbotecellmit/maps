@@ -16,8 +16,9 @@
             height: 100vh; 
             width: 100vw; 
         }
-          .leaflet-popup {
-            width: 40vw !important;
+        .leaflet-popup {
+            width: clamp(280px, 40vw, 800px) !important;
+            font-size: clamp(14px, calc(12px + 1vw), 18px);
         }
         .leaflet-popup-content-wrapper {
             width: 100% !important;
@@ -25,32 +26,37 @@
         }
         .leaflet-popup-content {
             width: 100% !important;
-            max-height: 60vh;
+            max-height: clamp(200px, 60vh, 600px);
             overflow-y: auto;
             line-height: 1.6;
             margin: 13px !important;
         }
         .dropdown {
             cursor: pointer;
-            background: #f0f0f0;
-            padding: 8px;
+            background: rgba(240, 240, 240, 0.7);
+            padding: clamp(6px, 1vw, 12px);
             margin: 5px 0;
             border-left: 4px solid #007bff;
             transition: background 0.3s;
         }
         .dropdown:hover {
-            background: #e0e0e0;
+            background: rgba(224, 224, 224, 0.7);
         }
         .dropdown-content {
-            background: #f9f9f9;
-            padding: 10px;
+            background: rgba(249, 249, 249, 0.7);
+            padding: clamp(8px, 1vw, 14px);
             border-left: 2px solid #007bff;
             margin-top: 5px;
         }
         .highlight-box {
             border: 2px solid rgba(255, 69, 0, 0.7);
-            background-color: rgba(255, 69, 0, 0.15); /* Light transparent */
+            background-color: rgba(255, 69, 0, 0.15);
             transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .leaflet-popup {
+                width: 90vw !important;
+            }
         }
     </style>
 </head>
@@ -69,7 +75,6 @@
             zoomControl: false
         });
 
-        // Custom zoom control
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         const imageUrl = 'map.png';
@@ -90,19 +95,24 @@
                 { latlng: [img.height * 0.555, img.width * 0.8475], name: 'MSME-2', boxSize: [img.height * 0.05, img.width * 0.05], details: [] }
             ];
 
+            function updatePopupContent(popupElement) {
+                const zoom = map.getZoom();
+                const scale = Math.max(1, 1 + zoom * 0.2);
+                popupElement.style.transform = `scale(${scale})`;
+            }
+
             locations.forEach(location => {
-                // Create a transparent clickable rectangle
                 const boxBounds = [
                     [location.latlng[0] - location.boxSize[0]/2, location.latlng[1] - location.boxSize[1]/2],
                     [location.latlng[0] + location.boxSize[0]/2, location.latlng[1] + location.boxSize[1]/2]
                 ];
 
                 const highlightBox = L.rectangle(boxBounds, {
-    className: 'highlight-box',
-    weight: 0,          // Removes any visible border
-    fillOpacity: 0,     // Fully transparent
-    color: 'transparent' // Completely invisible
-}).addTo(map);
+                    className: 'highlight-box',
+                    weight: 0,
+                    fillOpacity: 0,
+                    color: 'transparent'
+                }).addTo(map);
 
                 if (location.details.length > 0) {
                     let popupContent = `<strong style="font-size: 1.2em; color: #007bff;">${location.name}</strong><br>`;
@@ -117,10 +127,22 @@
                             </div>
                         `;
                     });
-                    highlightBox.bindPopup(popupContent, { maxWidth: 300, closeButton: true });
+                    
+                    const popup = highlightBox.bindPopup(popupContent, { 
+                        closeButton: true,
+                    });
+
+                    popup.on('add', function(e) {
+                        updatePopupContent(e.target._container);
+                    });
                 } else {
                     highlightBox.bindPopup(`<strong>${location.name}</strong><br>No details available.`);
                 }
+            });
+
+            map.on('zoomend', function() {
+                const popups = document.querySelectorAll('.leaflet-popup');
+                popups.forEach(updatePopupContent);
             });
         };
 
