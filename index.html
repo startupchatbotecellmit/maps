@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Campus Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -17,36 +18,38 @@
             width: 100vw; 
         }
         .leaflet-popup {
-            width: clamp(280px, 40vw, 800px) !important;
-            font-size: clamp(14px, calc(12px + 1vw), 18px);
+            width: clamp(300px, 80vw, 800px) !important;
+            font-size: clamp(16px, calc(14px + 1vw), 20px);
         }
         .leaflet-popup-content-wrapper {
             width: 100% !important;
             background: rgba(173, 216, 230, 0.9) !important;
+            max-width: none !important;
         }
         .leaflet-popup-content {
             width: 100% !important;
-            max-height: clamp(200px, 60vh, 600px);
+            max-height: clamp(250px, 70vh, 600px);
             overflow-y: auto;
             line-height: 1.6;
-            margin: 13px !important;
+            margin: 15px !important;
+            padding: 10px;
         }
         .dropdown {
             cursor: pointer;
-            background: rgba(240, 240, 240, 0.7);
-            padding: clamp(6px, 1vw, 12px);
-            margin: 5px 0;
+            background: rgba(240, 240, 240, 0.9);
+            padding: clamp(8px, 1.5vw, 16px);
+            margin: 8px 0;
             border-left: 4px solid #007bff;
             transition: background 0.3s;
         }
         .dropdown:hover {
-            background: rgba(224, 224, 224, 0.7);
+            background: rgba(224, 224, 224, 0.9);
         }
         .dropdown-content {
-            background: rgba(249, 249, 249, 0.7);
-            padding: clamp(8px, 1vw, 14px);
+            background: rgba(249, 249, 249, 0.9);
+            padding: clamp(10px, 1.5vw, 18px);
             border-left: 2px solid #007bff;
-            margin-top: 5px;
+            margin-top: 8px;
         }
         .highlight-box {
             border: 2px solid rgba(255, 69, 0, 0.7);
@@ -56,6 +59,14 @@
         @media (max-width: 768px) {
             .leaflet-popup {
                 width: 90vw !important;
+                transform-origin: center bottom !important;
+            }
+            .leaflet-popup-content {
+                font-size: 16px;
+                padding: 12px;
+            }
+            .dropdown {
+                padding: 12px;
             }
         }
     </style>
