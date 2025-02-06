@@ -16,13 +16,20 @@
             height: 100vh; 
             width: 100vw; 
         }
+          .leaflet-popup {
+            width: 40vw !important;
+        }
+        .leaflet-popup-content-wrapper {
+            width: 100% !important;
+            background: rgba(173, 216, 230, 0.9) !important;
+        }
         .leaflet-popup-content {
-            max-height: 600px;
-            width: 300px !important;
+            width: 100% !important;
+            max-height: 60vh;
             overflow-y: auto;
             line-height: 1.6;
+            margin: 13px !important;
         }
-
         .dropdown {
             cursor: pointer;
             background: #f0f0f0;
